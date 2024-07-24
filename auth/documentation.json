@@ -1,0 +1,146 @@
+[
+    {
+        "tags": ["User"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "first_name": {"type": "string", "example": "John"},
+                        "last_name": {"type": "string", "example": "Doe"},
+                        "email": {"type": "string", "example": "john.doe@example.com"},
+                        "gender": {"type": "string", "example": "M"},
+                        "username": {"type": "string", "example": "john"},
+                        "password": {"type": "string", "example": "securepassword"},
+                        "address": {"type": "string", "example": "123 Bello St"}
+                    },
+                    "required": ["email", "username", "password"]
+                }
+            }
+        ],
+        "responses": {
+            "201": {
+                "description": "User created successfully",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "400": {
+                "description": "Invalid input",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "500": {
+                "description": "User creation failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "error": {"type": "string"}
+                    }
+                }
+            }
+        }
+    },
+    {
+        "tags": ["User"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "username": {
+                            "type": "string",
+                            "example": "john"
+                        },
+                        "password": {
+                            "type": "string",
+                            "example": "securepassword"
+                        }
+                    },
+                    "required": ["username", "password"]
+                }
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "Login successful",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string",
+                            "example": "Login successful"
+                        }
+                    }
+                }
+            },
+            "400": {
+                "description": "Invalid input",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string",
+                            "example": "Invalid input"
+                        }
+                    }
+                }
+            },
+            "401": {
+                "description": "Unauthorized",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {
+                            "type": "string",
+                            "example": "Unauthorized"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "tags": ["User"],
+        "responses": {
+            "200": {
+                "description": "Current user retrieved successfully",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string", "example": "uuid"},
+                        "first_name": {"type": "string", "example": "John"},
+                        "last_name": {"type": "string", "example": "Doe"},
+                        "email": {"type": "string", "example": "john.doe@example.com"},
+                        "gender": {"type": "string", "example": "Male"},
+                        "username": {"type": "string", "example": "johndoe"},
+                        "address": {"type": "string", "example": "123 Main St"}
+                    }
+                }
+            },
+            "401": {
+                "description": "Unauthorized",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string", "example": "Unauthorized"}
+                    }
+                }
+            }
+        }
+    }
+]
