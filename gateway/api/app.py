@@ -28,7 +28,7 @@ jwt = JWTManager(app)
 def home():
     return 'App running'
 
-@app.route('/signup', methods=['POST'])
+@app.route('/auth/signup', methods=['POST'])
 @swag_from(documentation[0])
 def signup():
     data = request.get_json()
@@ -36,7 +36,7 @@ def signup():
     auth = UserAuth(db=db)
     return auth.signup(data)
 
-@app.route('/login', methods=['POST'])
+@app.route('/auth/login', methods=['POST'])
 @swag_from(documentation[1])
 def login():
     data = request.get_json()
@@ -45,7 +45,7 @@ def login():
     return auth.login(data)
 
 # Get current user endpoint
-@app.route('/get_current_user', methods=['GET'])
+@app.route('/user/me', methods=['GET'])
 @jwt_required()
 @swag_from(documentation[2])
 def get_current_user():
