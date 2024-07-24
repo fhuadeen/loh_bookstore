@@ -48,7 +48,10 @@ class Auth(LoHBase):
         if not data or not data.get('username') or not data.get('password'):
             abort(400, message="Username, and password are required")
 
-        user: User = self.db.query(username=data.get('username'))
+        try:
+            user: User = self.db.query(username=data.get('username'))
+        except Exception as err:
+            abort(500, message=f"Failed to query db: {str(err)}")
 
         if not user or not check_password_hash(user.password, data['password']):
             abort(401, message=f"Invalid credentials")
@@ -61,7 +64,10 @@ class Auth(LoHBase):
 
     def get_current_user(self):
         current_user_username = get_jwt_identity()
-        current_user: User = self.db.query(username=current_user_username)
+        try:
+            current_user: User = self.db.query(username=current_user_username)
+        except Exception as err:
+            abort(500, message=f"Failed to query db: {str(err)}")
 
         if not current_user:
             abort(404, message="User not found")
