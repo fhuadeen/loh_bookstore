@@ -4,7 +4,7 @@ import sys
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
 
-from flask import Flask
+from flask import request, Flask
 from flasgger import Swagger
 from flasgger.utils import swag_from
 
@@ -33,6 +33,13 @@ def get_all_user_orders(user_id):
 def get_book_by_id(order_id, user_id):
     oms = BookOMS(db=db)
     return oms.get_order_by_id(order_id=order_id, user_id=user_id)
+
+@app.route("/oms/orders/buy", methods=['POST'])
+@swag_from(documentation[2])
+def place_order():
+    data = request.get_json()
+    oms = BookOMS(db=db)
+    return oms.place_order(data)
 
 
 if __name__ == '__main__':

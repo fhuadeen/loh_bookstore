@@ -74,5 +74,62 @@
                 }
             }
         }
+    },
+    {
+        "tags": ["Orders"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "items": {
+                            "type": "object",
+                            "example": [{
+                                "id": "1b395692-ecc2-4db0-aa77-fe902505714f",
+                                "name": "Adaptive high-level leverage",
+                                "unit_price": 2545.67,
+                                "units_ordered": 359,
+                                "created_at": "2024-01-01T12:00:00Z"
+                            }]
+                        }
+                    },
+                    "required": ["id", "name", "unit_price", "units_ordered"]
+                }
+            }
+        ],
+        "responses": {
+            "201": {
+                "description": "Order confirmed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "422": {
+                "description": "Payment failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "500": {
+                "description": "Order creation failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "error": {"type": "string"}
+                    }
+                }
+            }
+        }
     }
 ]

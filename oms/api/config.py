@@ -10,6 +10,7 @@ from loh_utils.databases.sql import PostgreSQL
 load_dotenv()
 
 DATABASE_URL: str = str(os.getenv("DATABASE_URL"))
+PAYMENT_BASE_URL: str = str(os.getenv("PAYMENT_BASE_URL"))
 
 db = PostgreSQL(database_url=DATABASE_URL)
 

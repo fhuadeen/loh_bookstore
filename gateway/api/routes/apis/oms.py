@@ -48,3 +48,35 @@ def get_book_by_id(order_id):
         method=request.method,
     )
     return jsonify(res.json()), 200
+
+@oms_bp.route("/orders/buy", methods=['POST'])
+@jwt_required()
+@swag_from(documentation[7])
+def place_order():
+    data = request.get_json()
+
+    # get current user id
+    current_user_username = get_jwt_identity()
+    current_user: User = db.query(username=current_user_username)
+    user_id = current_user.id
+
+    data["user_id"] = user_id
+
+    res = make_request(
+        url=f"{OMS_BASE_URL}/oms/orders/buy",
+        headers=dict(request.headers),
+        method=request.method,
+        body=data,
+    )
+    return jsonify(res.json()), 200
+
+
+if __name__ == '__main__':
+
+    # create schemas if not exist
+    db.create_schemas(["oms_db"])
+
+    # create tables in respective schemas if not exist
+    db.create_specific_tables(tables=["orders"])
+
+    app.run(debug=True, port=5002)
