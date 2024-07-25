@@ -1,8 +1,8 @@
 from typing import Dict, List, Any
 import os
 import sys
-from datetime import datetime, timezone, timedelta
 import abc
+import json
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -13,9 +13,10 @@ from loh_utils.databases.sql import Book
 from flask import jsonify
 from flask_restful import abort
 
+from api.config import db
 
 class Inventory(LoHBase):
-    def update_product(self):
+    def update_products(self):
         pass
 
     @abc.abstractmethod
@@ -60,7 +61,7 @@ class BooksInventory(Inventory):
         }), 200
 
     def create_products(self, products: List[Dict]):
-        
+
         books = []
         for product in products:
             book = Book(
@@ -75,6 +76,18 @@ class BooksInventory(Inventory):
             res = [self.db.insert(book) for book in books]
         except Exception as err:
             raise Exception(f"Failed to create books in db: {str(err)}")
-            # abort(500, message=f"Failed to create books in db: {str(err)}")
         return "Books created successfully"
-        # return jsonify({"message": "Books created successfully"}), 201
+
+    @staticmethod
+    def update_products_units(products: Dict):
+        products = json.loads(products)
+        for product_id, sub_value in products.items():
+            update_data = {"units": Book.units - sub_value}
+            try:
+                db.update(
+                    model_class=Book,
+                    update_data=update_data,
+                    record_id=product_id,
+                )
+            except Exception as err:
+                raise Exception(f"Failed to update books in db: {str(err)}")

@@ -1,4 +1,4 @@
-from typing import List, Dict
+from typing import List, Dict, Tuple
 import os
 import sys
 import abc
@@ -9,12 +9,14 @@ sys.path.insert(0, BASE)
 
 from loh_utils.loh_base import LoHBase
 from loh_utils.databases.sql import Order
+from loh_utils.event_bus import RabbitMQ
 
 from flask import jsonify
 from flask_restful import abort
 
 from api.config import PAYMENT_BASE_URL
 from api.utils import send_post_request
+from api.event_bus import publish
 
 
 class OMS(LoHBase):
@@ -36,15 +38,7 @@ class OMS(LoHBase):
             payload=data,
         )
 
-    def place_order(self, data: Dict):
-        # user_id, items
-        user_id = data.get("user_id")
-        if not user_id:
-            return jsonify({"error": "User ID not provided."}), 422
-        items: List[Dict] = data.get("items")
-
-        # TODO: Confirm quantity of books left before continuing
-
+    def __get_items_total_amount(self, items: List) -> Tuple[Dict, int]:
         # calculate total from products
         item_units = {}
         amounts = []
@@ -55,6 +49,18 @@ class OMS(LoHBase):
             # to update inventory
             item_units[item.get('id')] = item.get('units_ordered')
         total_amount = sum(amounts)
+        return item_units, total_amount
+
+    def place_order(self, data: Dict):
+        # user_id, items
+        user_id = data.get("user_id")
+        if not user_id:
+            return jsonify({"error": "User ID not provided."}), 422
+        items: List[Dict] = data.get("items")
+
+        # TODO: Confirm quantity of books left before continuing
+
+        items_units, total_amount = self.__get_items_total_amount(items)
 
         # create order object with order_status as pending
         order = Order(
@@ -88,6 +94,7 @@ class OMS(LoHBase):
         self.db.insert(order)
 
         # send message to inventory to update items units
+        publish(msg=items_units)
         return jsonify({"message": "Order confirmed"})
 
 

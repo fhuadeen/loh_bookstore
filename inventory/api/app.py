@@ -1,5 +1,6 @@
 import os
 import sys
+from multiprocessing import Process
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -13,6 +14,7 @@ from loh_utils.databases.sql import Book
 from api.config import DATABASE_URL, db, documentation
 from api.services import BooksInventory
 from api.seed import seed_books_to_db
+from api.event_bus import consume_products_update
 
 
 app = Flask(__name__)
@@ -49,5 +51,13 @@ if __name__ == '__main__':
     # seed data if not exist
     inv = BooksInventory(db=db)
     seed_books_to_db(num_books=30, book_model_obj=inv)
+
+    # Start the RabbitMQ consumers
+    consumer_processes = [
+        Process(target=consume_products_update),
+    ]
+
+    for i in consumer_processes:
+        i.start()
 
     app.run(debug=True, port=5001)
