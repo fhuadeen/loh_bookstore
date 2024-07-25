@@ -11,6 +11,7 @@ from flask_jwt_extended import JWTManager
 from api.config import DATABASE_URL, db, JWT_SECRET_KEY
 from api.routes.apis.auth import auth_bp
 from api.routes.apis.inventory import inventory_bp
+from api.routes.apis.oms import oms_bp
 
 
 def create_app():
@@ -23,6 +24,7 @@ def create_app():
     # Register blueprints
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(inventory_bp, url_prefix='/products')
+    app.register_blueprint(oms_bp, url_prefix='/oms')
 
     return app
 
