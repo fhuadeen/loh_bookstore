@@ -13,7 +13,7 @@ RUN pip install --no-cache-dir --upgrade -r /code/requirements.txt
 
 COPY . .
 
-EXPOSE 5000
+EXPOSE 5003
 
 ENV FLASK_APP=api/app.py
 
