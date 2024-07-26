@@ -1,4 +1,4 @@
-from typing import Dict, List
+from typing import Dict, List, Tuple
 import os
 import sys
 from datetime import datetime, timezone, timedelta
@@ -17,7 +17,8 @@ from flask_jwt_extended import create_access_token, get_jwt_identity
 
 class Auth(LoHBase):
 
-    def signup(self, data: Dict):
+    def signup(self, data: Dict) -> Tuple[Dict, int]:
+        """To register new user on the app"""
 
         # Validate input data
         if not data or not data.get('email') or not data.get('password') or not data.get('username'):
@@ -63,7 +64,8 @@ class Auth(LoHBase):
 
         return jsonify({'id': user_obj.id, 'message': 'User created successfully'}), 201
 
-    def login(self, data: Dict):
+    def login(self, data: Dict) -> Tuple[Dict, int]:
+        """ Login user"""
         if not data or not data.get('username') or not data.get('password'):
             abort(400, message="Username, and password are required")
 
@@ -81,7 +83,8 @@ class Auth(LoHBase):
 
         return jsonify({'message': 'Login successful', 'access_token': access_token}), 200
 
-    def get_current_user(self):
+    def get_current_user(self) -> Tuple[Dict, int]:
+        """Get currently signed in user"""
         current_user_username = get_jwt_identity()
         try:
             current_user: User = self.db.query(username=current_user_username)

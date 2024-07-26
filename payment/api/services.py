@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Dict, Tuple
 import os
 import sys
 import abc
@@ -17,12 +17,13 @@ class Payment(abc.ABC):
         pass
 
     @abc.abstractmethod
-    def pay(self, user_id: str):
+    def pay(self, data: Dict):
+        """Make payment"""
         pass
 
 
 class LoHstack(Payment):
-    def pay(self, data: Dict):
+    def pay(self, data: Dict) -> Tuple[Dict, int]:
 
         # dummy payment
         res = random.choice((0,1,2,3,4,5))

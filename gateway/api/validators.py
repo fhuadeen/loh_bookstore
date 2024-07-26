@@ -1,4 +1,4 @@
-from typing import Optional, Dict, List
+from typing import Optional, Dict, List, Union, Any
 import abc
 
 from pydantic import BaseModel, EmailStr, Field, ValidationError
@@ -30,7 +30,20 @@ class UpdateOrderStatusValidator(BaseModel):
     user_id: str = Field(...)
 
 
-def validate(validator_class, data):
+def validate(validator_class: Union[BaseModel, Any], data: Dict) -> Dict:
+    """
+    Runs a validator class on given payload
+
+    Args:
+        validator_class Union[BaseModel, Any]: a validator class. e.g. SignUpValidator
+        data (Dict): _description_
+
+    Raises:
+        Exception: invalid payload
+
+    Returns:
+        Dict: Validated data
+    """
     try:
         validated_data = validator_class(**data)
     except ValidationError as err:

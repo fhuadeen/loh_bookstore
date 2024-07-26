@@ -1,6 +1,9 @@
+from typing import Dict
+
 import requests
 
-def send_post_request(url, payload):
+def send_post_request(url: str, payload: Dict):
+    """Post synchronous http requests"""
     headers = {
         'Content-Type': 'application/json'
     }

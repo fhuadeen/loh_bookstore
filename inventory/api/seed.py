@@ -1,11 +1,21 @@
 from faker import Faker
 import random
+from typing import List
 
 from loh_utils.databases.sql import Book
 
 from services import BooksInventory
 
-def generate_fake_books(num_books: int):
+def generate_fake_books(num_books: int) -> List[Book]:
+    """
+    Geneerates fake book records.
+
+    Args:
+        num_books (int): Number of books to generate
+
+    Returns:
+        List[Book]: List of Book instances
+    """
     fake = Faker()
     books = []
 
@@ -20,8 +30,18 @@ def generate_fake_books(num_books: int):
 
     return books
 
-def seed_books_to_db(num_books: int, book_model_obj: BooksInventory):
-    
+def seed_books_to_db(num_books: int, book_model_obj: BooksInventory) -> str:
+    """
+    Seed books into database.
+
+    Args:
+        num_books (int): Number of books to seed
+        book_model_obj (BooksInventory): BooksInventory instance
+
+    Returns:
+        str: Seeded {num_books} books to db
+    """
+
     # seed data if not exist
     kwargs = {"model_class": Book}
     db_books = book_model_obj.db.query(**kwargs)

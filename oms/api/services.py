@@ -31,7 +31,7 @@ class OMS(LoHBase):
     def get_order_by_id(self, order_id: str):
         pass
 
-    def update_order(self, data: Dict):
+    def update_order(self, data: Dict) -> Tuple[Dict, int]:
 
         order_id = data.get("order_id")
         user_id = data.get("user_id")
@@ -41,8 +41,6 @@ class OMS(LoHBase):
             record_id=order_id,
             fetch_all=False,
         )
-
-        print("order", order)
 
         if not order:
             return jsonify({"error": "Order not found"}), 404
@@ -70,6 +68,14 @@ class OMS(LoHBase):
         )
 
     def __get_items_total_amount(self, items: List) -> Tuple[Dict, int]:
+        """_summary_
+
+        Args:
+            items (List): List of items built
+
+        Returns:
+            Tuple[Dict, int]: items units and total amount for a particular order
+        """
         # calculate total from products
         item_units = {}
         amounts = []
@@ -82,7 +88,16 @@ class OMS(LoHBase):
         total_amount = sum(amounts)
         return item_units, total_amount
 
-    def place_order(self, data: Dict):
+    def place_order(self, data: Dict) -> Tuple[Dict, int]:
+        """
+        Place an order
+
+        Args:
+            data (Dict): payload in request
+
+        Returns:
+            Tuple[Dict, int]: order confirmed
+        """
         # user_id, items
         user_id = data.get("user_id")
         if not user_id:
@@ -126,11 +141,12 @@ class OMS(LoHBase):
 
         # send message to inventory to update items units
         publish(msg=items_units)
-        return jsonify({"message": "Order confirmed"})
+        return jsonify({"message": "Order confirmed"}), 200
 
 
 class BookOMS(OMS):
-    def get_orders(self, user_id: str):
+    def get_orders(self, user_id: str) -> Tuple[Dict, int]:
+        """Get all orders of current user"""
         db_kwargs = {
             "model_class": Order,
             "filters": [Order.user_id == user_id]
@@ -152,6 +168,7 @@ class BookOMS(OMS):
         return jsonify(orders_list), 200
 
     def get_order_by_id(self, order_id: str, user_id: str):
+        """Get an order of current user by id"""
         try:
             order: Order = self.db.query(model_class=Order, record_id=order_id)
         except Exception as err:
@@ -172,10 +189,9 @@ class BookOMS(OMS):
             'order_status': order.order_status,
             'created_at': order.created_at.isoformat(),
         }), 200
-    
-    # def __confirm_order_status_type()
 
     def update_order_status(self, data: Dict):
+        """Update the status of an order. e.g. shipped to delivered."""
         self.update_order(data)
 
         order_id = data.get('order_id')

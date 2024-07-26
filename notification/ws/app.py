@@ -12,6 +12,12 @@ from ws.config import NOTIFICATION_SERVER_HOST
 connected_clients = set()
 
 async def register(websocket):
+    """
+    Register server to websocket
+
+    Args:
+        websocket (_type_): websocket server to register
+    """
     connected_clients.add(websocket)
     try:
         await websocket.wait_closed()
@@ -19,6 +25,12 @@ async def register(websocket):
         connected_clients.remove(websocket)
 
 async def notify_clients(message):
+    """
+    Notify connected clients
+
+    Args:
+        message (str): Message to send
+    """
     if connected_clients:  # asyncio.wait doesn't accept an empty list
         await asyncio.wait([client.send(message) for client in connected_clients])
 

@@ -1,4 +1,4 @@
-from typing import Dict, List, Any
+from typing import Dict, List, Any, Tuple
 import os
 import sys
 import abc
@@ -28,7 +28,13 @@ class Inventory(LoHBase):
 
 
 class BooksInventory(Inventory):
-    def get_books(self):
+    def get_books(self) -> Tuple[List[Dict], int]:
+        """
+        Get all books in the db.
+
+        Returns:
+            Tuple[Dict]: list of book objects
+        """
         kwargs = {"model_class": Book}
         books: List[Book] = self.db.query(**kwargs)
 
@@ -43,7 +49,16 @@ class BooksInventory(Inventory):
             })
         return jsonify(books_list), 200
 
-    def get_book_by_id(self, book_id: str):
+    def get_book_by_id(self, book_id: str) -> Tuple[Dict, int]:
+        """
+        Gets a book by the id given
+
+        Args:
+            book_id (str): Book ID
+
+        Returns:
+            Tuple[Dict, int]: Book object
+        """
         try:
             book: Book = self.db.query(model_class=Book, record_id=book_id)
         except Exception as err:
@@ -60,7 +75,7 @@ class BooksInventory(Inventory):
             'created_at': book.created_at.isoformat(),
         }), 200
 
-    def create_products(self, products: List[Dict]):
+    def create_products(self, products: List[Dict]) -> str:
 
         books = []
         for product in products:
@@ -79,7 +94,16 @@ class BooksInventory(Inventory):
         return "Books created successfully"
 
     @staticmethod
-    def update_products_units(products: Dict):
+    def update_products_units(products: Dict) -> None:
+        """
+        Updates products (books) units in db.
+
+        Args:
+            products (Dict): Product IDs and value to subtract from the units left in db.
+
+        Raises:
+            Exception: Failed to update books in db
+        """
         products = json.loads(products)
         for product_id, sub_value in products.items():
             update_data = {"units": Book.units - sub_value}

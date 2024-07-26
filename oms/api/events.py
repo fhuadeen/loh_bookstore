@@ -20,6 +20,13 @@ def publish(
     queue_name: str = INVENTORY_QUEUE,
     delivery_mode: bool = True
 ):
+    """Publishes data to event bus
+
+    Args:
+        msg (Dict): message to be published
+        queue_name (str, optional): queue to publish message to. Defaults to INVENTORY_QUEUE.
+        delivery_mode (bool, optional): If delivery to be persistent or not. Defaults to True.
+    """
 
     eb = RabbitMQ(
         host=RABBITMQ_HOST,
@@ -35,6 +42,7 @@ def publish(
     )
 
 class BaseNotificator(abc.ABC):
+    """Base client for notification"""
     def __init__(self, notification_server_host: str = NOTIFICATION_SERVER_HOST):
         self.uri = f"ws://{notification_server_host}"
 
@@ -43,7 +51,8 @@ class BaseNotificator(abc.ABC):
         pass
 
 class WebSocketsNotificator(BaseNotificator):
-    async def send_notification(self, message):
+    "client for notification websockets"
+    async def send_notification(self, message) -> None:
         async with websockets.connect(self.uri) as websocket:
             await websocket.send(json.dumps(message))
             print(f"Sent message: {message}")
