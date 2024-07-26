@@ -51,6 +51,10 @@ spec:
                 secretKeyRef:
                   name: apps-secrets
                   key: OMS_BASE_URL
+            - name: INVENTORY_BASE_URL
+              value: "http://inventory-srv:5001"
+            - name: OMS_BASE_URL
+              value: "http://oms-srv:5002"
 ---
 apiVersion: v1
 kind: Service
