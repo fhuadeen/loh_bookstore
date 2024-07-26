@@ -18,4 +18,4 @@ spec:
               service:
                 name: gateway-srv
                 port:
-                  number: 8000
+                  number: 5000
