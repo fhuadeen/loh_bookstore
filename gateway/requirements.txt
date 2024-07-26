@@ -1,5 +1,4 @@
-git+https://@github.com/fhuadeen/loh_utils.git
-# git+https://<github-access-key>@github.com/fhuadeen/loh_utils.git
+git+https://<github-access-key>@github.com/fhuadeen/loh_utils.git
 Flask==3.0.3
 Flask-RESTful==0.3.10
 python-dotenv==1.0.0

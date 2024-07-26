@@ -1,0 +1,8 @@
+requirements_dev.txt
+/__pycache__
+/__pycache__
+TODO
+.env
+/sys_venv
+/.pytest_cache
+/.mypy_cache
