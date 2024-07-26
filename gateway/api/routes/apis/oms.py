@@ -12,6 +12,11 @@ from loh_utils.databases.sql import User
 
 from api.config import OMS_BASE_URL, documentation, db
 from api.routes.network import make_request
+from api.validators import (
+    PlaceOrderValidator,
+    UpdateOrderStatusValidator,
+    validate,
+)
 
 oms_bp = Blueprint('oms', __name__)
 
@@ -55,28 +60,41 @@ def get_book_by_id(order_id):
 def place_order():
     data = request.get_json()
 
+    try:
+        validated_data = validate(PlaceOrderValidator, data)
+    except Exception as err:
+        return jsonify({"error": str(err)}), 400
+
     # get current user id
     current_user_username = get_jwt_identity()
     current_user: User = db.query(username=current_user_username)
     user_id = current_user.id
 
-    data["user_id"] = user_id
+    validated_data["user_id"] = user_id
 
     res = make_request(
         url=f"{OMS_BASE_URL}/oms/orders/buy",
         headers=dict(request.headers),
         method=request.method,
-        body=data,
+        body=validated_data,
     )
     return jsonify(res.json()), 200
 
+@oms_bp.route("/orders/status/update", methods=['PATCH'])
+@jwt_required()
+@swag_from(documentation[8])
+def update_order_status():
+    data = request.get_json()
 
-if __name__ == '__main__':
+    try:
+        validated_data = validate(UpdateOrderStatusValidator, data)
+    except Exception as err:
+        return jsonify({"error": str(err)}), 400
 
-    # create schemas if not exist
-    db.create_schemas(["oms_db"])
-
-    # create tables in respective schemas if not exist
-    db.create_specific_tables(tables=["orders"])
-
-    app.run(debug=True, port=5002)
+    res = make_request(
+        url=f"{OMS_BASE_URL}/oms/orders/status/update",
+        headers=dict(request.headers),
+        method=request.method,
+        body=validated_data,
+    )
+    return jsonify(res.json()), 200

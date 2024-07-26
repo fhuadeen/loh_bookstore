@@ -1,5 +1,6 @@
 import os
 import sys
+import asyncio
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -7,6 +8,8 @@ sys.path.insert(0, BASE)
 from flask import request, Flask
 from flasgger import Swagger
 from flasgger.utils import swag_from
+from flask_socketio import SocketIO
+import websockets
 
 from api.config import DATABASE_URL, db, documentation
 from api.services import BookOMS
@@ -14,6 +17,8 @@ from api.services import BookOMS
 
 app = Flask(__name__)
 app.config['DATABASE_URL'] = DATABASE_URL
+
+socketio = SocketIO(app)
 
 # Initialize Swagger
 swagger = Swagger(app)
@@ -41,13 +46,22 @@ def place_order():
     oms = BookOMS(db=db)
     return oms.place_order(data)
 
+@app.route('/oms/orders/status/update', methods=['PATCH'])
+@swag_from(documentation[3])
+def update_order_status():
+    data = request.get_json()
+
+    oms = BookOMS(db=db)
+    return oms.update_order_status(data)
+
 
 if __name__ == '__main__':
 
-    # create schemas if not exist
+    # create schemas if not exist.
     db.create_schemas(["oms_db"])
 
     # create tables in respective schemas if not exist
     db.create_specific_tables(tables=["orders"])
 
-    app.run(debug=True, port=5002)
+    # app.run(debug=True, port=5002)
+    socketio.run(app, debug=True, host='localhost', port=5002)

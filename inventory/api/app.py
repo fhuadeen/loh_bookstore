@@ -14,7 +14,7 @@ from loh_utils.databases.sql import Book
 from api.config import DATABASE_URL, db, documentation
 from api.services import BooksInventory
 from api.seed import seed_books_to_db
-from api.event_bus import consume_products_update
+from api.events import consume_products_update
 
 
 app = Flask(__name__)

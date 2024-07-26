@@ -19,6 +19,8 @@ RABBITMQ_PASSWORD = str(os.getenv("RABBITMQ_PASSWORD"))
 
 INVENTORY_QUEUE = str(os.getenv("INVENTORY_QUEUE"))
 
+NOTIFICATION_SERVER_HOST = str(os.getenv("NOTIFICATION_SERVER_HOST"))
+
 db = PostgreSQL(database_url=DATABASE_URL)
 
 doc_path = os.path.join(BASE, "documentation.json")

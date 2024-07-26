@@ -131,5 +131,54 @@
                 }
             }
         }
+    },
+    {
+        "tags": ["Orders"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "order_id": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "order_status": {"type": "string", "example": "shipped"}
+                    },
+                    "required": ["id"]
+                }
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "Order updated",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "404": {
+                "description": "Order not found",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "500": {
+                "description": "Order update failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "error": {"type": "string"}
+                    }
+                }
+            }
+        }
     }
 ]

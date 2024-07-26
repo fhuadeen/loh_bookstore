@@ -1,8 +1,10 @@
+import json
 from typing import List, Dict, Tuple
 import os
 import sys
 import abc
 import uuid
+import asyncio
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -16,7 +18,7 @@ from flask_restful import abort
 
 from api.config import PAYMENT_BASE_URL
 from api.utils import send_post_request
-from api.event_bus import publish
+from api.events import publish, WebSocketsNotificator
 
 
 class OMS(LoHBase):
@@ -29,8 +31,37 @@ class OMS(LoHBase):
     def get_order_by_id(self, order_id: str):
         pass
 
-    def update_order(self):
-        pass
+    def update_order(self, data: Dict):
+
+        order_id = data.get("order_id")
+        user_id = data.get("user_id")
+
+        order: Order = self.db.query(
+            model_class=Order,
+            record_id=order_id,
+            fetch_all=False,
+        )
+
+        print("order", order)
+
+        if not order:
+            return jsonify({"error": "Order not found"}), 404
+
+        # order not for user
+        if order.user_id != user_id:
+            return jsonify({"error": "Order not found"}), 404
+
+        update_data = {"order_status": data.get("order_status")}
+        try:
+            self.db.update(
+                model_class=Order,
+                update_data=update_data,
+                record_id=order_id,
+            )
+        except Exception as err:
+            raise Exception(f"Failed to update books in db: {str(err)}")
+
+        return jsonify({"message": "order updated"}), 200
 
     def initiate_payment(self, data: Dict):
         return send_post_request(
@@ -141,3 +172,20 @@ class BookOMS(OMS):
             'order_status': order.order_status,
             'created_at': order.created_at.isoformat(),
         }), 200
+    
+    # def __confirm_order_status_type()
+
+    def update_order_status(self, data: Dict):
+        self.update_order(data)
+
+        order_id = data.get('order_id')
+        new_status = data.get('order_status')
+        user_id = data.get('user_id')
+
+        # send a message to the notification service
+        notification = {
+            "message": f'Order {order_id} status updated to {new_status}',
+            "user_id": user_id,
+        }
+        asyncio.run(WebSocketsNotificator().send_notification(notification))
+        return jsonify({'message': 'Order updated and notification sent'}), 200

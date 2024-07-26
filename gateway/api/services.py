@@ -25,6 +25,25 @@ class Auth(LoHBase):
 
         hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
 
+        # check if email already exists
+        try:
+            db_user: User = self.db.query(email=data.get('email'))
+        except Exception as err:
+            abort(500, message=f"Server error: {str(err)}")
+        if db_user:
+            return jsonify({"error": "Email already exist"}), 400
+            # abort(400, message="Email already exist")
+
+        # check if username already exists
+        try:
+            db_user: User = self.db.query(username=data.get('username'))
+        except Exception as err:
+            abort(500, message=f"Server error: {str(err)}")
+        if db_user:
+            return jsonify({"error": "Username already exist"}), 400
+            # abort(400, message="Username already exist")
+
+
         new_user = User(
             first_name=data.get('first_name'),
             last_name=data.get('last_name'),
