@@ -5,12 +5,6 @@ Following a somewhat Layered-Microservice architecture, we have the data access 
 
 With this design, it decouples the app from the type of data access tools used. Although we currently implemented Postgres with SQLAlchemy for the database, and RabbitMQ for between-app communications, it allows us to easily extend or modify the API to support other tools.
 
-## Code design
-
-## infra design
-
-## database design
-
 ## How to set up
 1. Create a github token for installing the `loh_utils` private repo package.
 
