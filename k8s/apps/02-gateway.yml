@@ -1,0 +1,71 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gateway-depl
+  namespace: loh-apps
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: gateway
+  template:
+    metadata:
+      labels:
+        app: gateway
+    spec:
+      nodeSelector:
+        role: gateway # deploy to node with gateway label.
+      containers:
+        - name: gateway
+          image: fhuadeen/loh-main:prod
+          imagePullPolicy: Always
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1000m #100m
+              memory: 1Gi #256Mi
+          ports:
+            - containerPort: 5000
+          env:
+            - name: POSTGRES_DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: POSTGRES_DATABASE_URL
+            - name: TOKEN_EXPIRY_HOURS
+              value: "1"
+            - name: JWT_SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: JWT_SECRET_KEY
+            - name: INVENTORY_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: INVENTORY_BASE_URL
+            - name: OMS_BASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: apps-secrets
+                  key: OMS_BASE_URL
+            - name: INVENTORY_BASE_URL
+              value: "http://inventory-srv:5001"
+            - name: OMS_BASE_URL
+              value: "http://oms-srv:5002"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gateway-srv
+  namespace: loh-apps
+spec:
+  selector:
+    app: gateway
+  ports:
+    - name: gateway
+      protocol: TCP
+      port: 5000
+      targetPort: 5000

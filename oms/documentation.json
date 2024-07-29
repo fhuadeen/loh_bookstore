@@ -1,0 +1,184 @@
+[
+    {
+        "tags": ["Orders"],
+        "parameters": [
+            {
+                "name": "user_id",
+                "in": "path",
+                "type": "string",
+                "required": true,
+                "description": "User ID of the owner of order_id to retrieve",
+                "example": "uuid"
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "A list of all orders of a current user",
+                "schema": {
+                    "type": "array",
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "id": {"type": "string", "example": "uuid"},
+                            "user_id": {"type": "string", "example": "uuid"},
+                            "order_status": {"type": "string", "example": "confirmed"},
+                            "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
+                        }
+                    }
+                }
+            }
+        }
+    },
+    {
+        "tags": ["Orders"],
+        "parameters": [
+            {
+                "name": "order_id",
+                "in": "path",
+                "type": "string",
+                "required": true,
+                "description": "ID of the order_id to retrieve",
+                "example": "uuid"
+            },
+            {
+                "name": "user_id",
+                "in": "path",
+                "type": "string",
+                "required": true,
+                "description": "User ID of the owner of order_id to retrieve",
+                "example": "uuid"
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "Details of the order",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "id": {"type": "string", "example": "uuid"},
+                        "user_id": {"type": "string", "example": "uuid"},
+                        "books": {"type": "object", "example": [{"name": "My book"}]},
+                        "price": {"type": "number", "example": 5.99},
+                        "order_status": {"type": "string", "example": "failed"},
+                        "created_at": {"type": "string", "format": "date-time", "example": "2024-01-01T12:00:00Z"}
+                    }
+                }
+            },
+            "404": {
+                "description": "Order not found",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string", "example": "Order not found"}
+                    }
+                }
+            }
+        }
+    },
+    {
+        "tags": ["Orders"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "items": {
+                            "type": "object",
+                            "example": [{
+                                "id": "1b395692-ecc2-4db0-aa77-fe902505714f",
+                                "name": "Adaptive high-level leverage",
+                                "unit_price": 2545.67,
+                                "units_ordered": 359,
+                                "created_at": "2024-01-01T12:00:00Z"
+                            }]
+                        }
+                    },
+                    "required": ["id", "name", "unit_price", "units_ordered"]
+                }
+            }
+        ],
+        "responses": {
+            "201": {
+                "description": "Order confirmed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "422": {
+                "description": "Payment failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "500": {
+                "description": "Order creation failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "error": {"type": "string"}
+                    }
+                }
+            }
+        }
+    },
+    {
+        "tags": ["Orders"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "user_id": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "order_id": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "order_status": {"type": "string", "example": "shipped"}
+                    },
+                    "required": ["id"]
+                }
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "Order updated",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "404": {
+                "description": "Order not found",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "500": {
+                "description": "Order update failed",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "error": {"type": "string"}
+                    }
+                }
+            }
+        }
+    }
+]

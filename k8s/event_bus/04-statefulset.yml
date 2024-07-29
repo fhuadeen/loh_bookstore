@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: rabbitmq
+  namespace: event-bus
+spec:
+  serviceName: "not-applicable"
+  selector:
+    matchLabels:
+      app: rabbitmq
+  template:
+    metadata:
+      labels:
+        app: rabbitmq
+    spec:
+      nodeSelector:
+        role: eventbus # deploy to node with gateway label.
+      containers:
+        - name: rabbitmq
+          image: rabbitmq:3-management
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 1000m #100m
+              memory: 1Gi #256Mi
+          ports:
+            - name: http
+              protocol: TCP
+              containerPort: 15672
+            - name: amqp
+              protocol: TCP
+              containerPort: 5672
+          envFrom:
+            - configMapRef:
+                name: rabbitmq-configmap
+            - secretRef:
+                name: rabbitmq-secret

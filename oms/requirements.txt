@@ -1,0 +1,10 @@
+git+https://@github.com/fhuadeen/loh_utils.git
+# git+https://<github-access-key>@github.com/fhuadeen/loh_utils.git
+Flask==3.0.3
+Flask-RESTful==0.3.10
+python-dotenv==1.0.0
+flask-swagger-ui==4.11.1
+flasgger==0.9.7.1
+requests==2.32.3
+websockets==12.0
+Flask-SocketIO 5.3.6
