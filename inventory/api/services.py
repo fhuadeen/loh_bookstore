@@ -12,7 +12,6 @@ from loh_utils.databases.sql import Book
 from loh_utils.media import Media
 
 from flask import jsonify
-from flask_restful import abort
 from werkzeug.utils import secure_filename
 
 from api.config import db, s3_obj, AI_QUEUE
@@ -39,8 +38,13 @@ class BooksInventory(Inventory):
         Returns:
             Tuple[Dict]: list of book objects
         """
-        kwargs = {"model_class": Book}
-        books: List[Book] = self.db.query(**kwargs)
+        db_kwargs = {
+            "model_class": [Book],
+            "filters": [],
+            "fetch_all": True,
+        }
+
+        books: List[Book] = self.db.query(**db_kwargs)
 
         books_list = []
         for book in books:
@@ -64,12 +68,18 @@ class BooksInventory(Inventory):
             Tuple[Dict, int]: Book object
         """
         try:
-            book: Book = self.db.query(model_class=Book, record_id=book_id)
+            db_kwargs = {
+                "model_class": [Book],
+                "filters": [Book.id == book_id],
+                "fetch_all": False,
+            }
+            book: Book = self.db.query(**db_kwargs)
+            print("book", book)
         except Exception as err:
-            abort(500, message=f"Failed to query db: {str(err)}")
+            return jsonify({"error": f"Failed to query db: {str(err)}"}), 500
 
         if not book:
-            abort(404, message="Book not found")
+            return jsonify({"error": "Book not found"}), 404
 
         return jsonify({
             'id': book.id,
@@ -89,7 +99,7 @@ class BooksInventory(Inventory):
 
         if book_file:
             filename = secure_filename(book_file.filename)
-            print(filename)
+            # print(filename)
             try:
                 media_obj.upload_file(book_file, filename)
             except Exception as err:

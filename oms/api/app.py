@@ -1,6 +1,5 @@
 import os
 import sys
-import asyncio
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
@@ -9,7 +8,6 @@ from flask import request, Flask
 from flasgger import Swagger
 from flasgger.utils import swag_from
 from flask_socketio import SocketIO
-import websockets
 
 from api.config import DATABASE_URL, db, documentation
 from api.services import BookOMS

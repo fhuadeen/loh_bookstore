@@ -1,3 +1,4 @@
+import json
 from typing import Dict, List, Tuple
 import os
 import sys
@@ -11,7 +12,6 @@ from loh_utils.databases.sql import User
 
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask import jsonify
-from flask_restful import abort
 from flask_jwt_extended import create_access_token, get_jwt_identity
 
 
@@ -22,28 +22,37 @@ class Auth(LoHBase):
 
         # Validate input data
         if not data or not data.get('email') or not data.get('password') or not data.get('username'):
-            abort(400, message="Email, username, and password are required")
+            return jsonify({"error": "Email, username, and password are required"}), 400
 
         hashed_password = generate_password_hash(data['password'], method='pbkdf2:sha256')
 
         # check if email already exists
+        db_kwargs = {
+            "model_class": [User],
+            "filters": [User.email == data.get('email')],
+            "fetch_all": False,
+        }
+
         try:
-            db_user: User = self.db.query(email=data.get('email'))
+            db_user: User = self.db.query(**db_kwargs)
         except Exception as err:
-            abort(500, message=f"Server error: {str(err)}")
+            return jsonify({"error": f"Server error: {str(err)}"}), 500
         if db_user:
             return jsonify({"error": "Email already exist"}), 400
-            # abort(400, message="Email already exist")
 
         # check if username already exists
         try:
-            db_user: User = self.db.query(username=data.get('username'))
+            db_kwargs = {
+                "model_class": [User],
+                "filters": [User.username == data.get('username')],
+                "fetch_all": False,
+            }
+            db_user: User = self.db.query(**db_kwargs)
         except Exception as err:
-            abort(500, message=f"Server error: {str(err)}")
+            return jsonify({"error": f"Server error: {str(err)}"}), 500
+
         if db_user:
             return jsonify({"error": "Username already exist"}), 400
-            # abort(400, message="Username already exist")
-
 
         new_user = User(
             first_name=data.get('first_name'),
@@ -60,23 +69,27 @@ class Auth(LoHBase):
         try:
             user_obj: User = self.db.insert(new_user)
         except Exception as err:
-            abort(500, message=f"Failed to create user: {str(err)}")
+            return jsonify({"error": f"Failed to create user: {str(err)}"}), 500
 
         return jsonify({'id': user_obj.id, 'message': 'User created successfully'}), 201
 
     def login(self, data: Dict) -> Tuple[Dict, int]:
         """ Login user"""
         if not data or not data.get('username') or not data.get('password'):
-            abort(400, message="Username, and password are required")
+            return jsonify({"error": "Username or password are required"}), 400
 
         try:
-            user: User = self.db.query(username=data.get('username'))
+            db_kwargs = {
+                "model_class": [User],
+                "filters": [User.username == data.get('username')],
+                "fetch_all": False,
+            }
+            user: User = self.db.query(**db_kwargs)
         except Exception as err:
-            abort(500, message=f"Failed to query db: {str(err)}")
+            return jsonify({"error": f"Failed to query db: {str(err)}"}), 500
 
         if not user or not check_password_hash(user.password, data['password']):
-            abort(401, message=f"Invalid credentials")
-            return jsonify({'message': 'Unauthorized'}), 401
+            return jsonify({'message': 'Invalid credentials'}), 401
 
         # Create JWT token
         access_token = create_access_token(identity=user.username, expires_delta=timedelta(hours=1))
@@ -87,12 +100,17 @@ class Auth(LoHBase):
         """Get currently signed in user"""
         current_user_username = get_jwt_identity()
         try:
-            current_user: User = self.db.query(username=current_user_username)
+            db_kwargs = {
+                "model_class": [User],
+                "filters": [User.username == current_user_username],
+                "fetch_all": False,
+            }
+            current_user: User = self.db.query(**db_kwargs)
         except Exception as err:
-            abort(500, message=f"Failed to query db: {str(err)}")
+            return jsonify({"error": f"Failed to query db: {str(err)}"}), 500
 
         if not current_user:
-            abort(404, message="User not found")
+            return jsonify({"error": "User not found"}), 404
 
         return jsonify({
             'id': current_user.id,

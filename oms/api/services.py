@@ -14,7 +14,6 @@ from loh_utils.databases.sql import Order
 from loh_utils.event_bus import RabbitMQ
 
 from flask import jsonify
-from flask_restful import abort
 
 from api.config import PAYMENT_BASE_URL
 from api.utils import send_post_request
@@ -36,11 +35,13 @@ class OMS(LoHBase):
         order_id = data.get("order_id")
         user_id = data.get("user_id")
 
-        order: Order = self.db.query(
-            model_class=Order,
-            record_id=order_id,
-            fetch_all=False,
-        )
+        db_kwargs = {
+            "model_class": [Order],
+            "filters": [Order.id == order_id],
+            "fetch_all": False,
+        }
+
+        order: Order = self.db.query(**db_kwargs)
 
         if not order:
             return jsonify({"error": "Order not found"}), 404
@@ -148,13 +149,14 @@ class BookOMS(OMS):
     def get_orders(self, user_id: str) -> Tuple[Dict, int]:
         """Get all orders of current user"""
         db_kwargs = {
-            "model_class": Order,
-            "filters": [Order.user_id == user_id]
+            "model_class": [Order],
+            "filters": [Order.user_id == user_id],
+            "fetch_all": True,
         }
         try:
             orders: List[Order] = self.db.query(**db_kwargs)
         except Exception as err:
-            abort(500, message=f"Failed to query db: {str(err)}")
+            return jsonify({"error": f"Failed to query db: {str(err)}"}), 500
 
         orders_list = []
         for order in orders:
@@ -169,23 +171,29 @@ class BookOMS(OMS):
 
     def get_order_by_id(self, order_id: str, user_id: str):
         """Get an order of current user by id"""
+
+        db_kwargs = {
+            "model_class": [Order],
+            "filters": [Order.id == order_id],
+            "fetch_all": False,
+        }
         try:
-            order: Order = self.db.query(model_class=Order, record_id=order_id)
+            order: Order = self.db.query(**db_kwargs)
         except Exception as err:
-            abort(500, message=f"Failed to query db: {str(err)}")
+            return jsonify({"error": f"Failed to query db: {str(err)}"}), 500
 
         if not order:
-            abort(404, message="Order not found")
+            return jsonify({"error": "Order not found"}), 404
 
         # if order not for current user
         if order.user_id != user_id:
-            abort(404, message="Order not found")
+            return jsonify({"error": "Order not found"}), 404
 
         return jsonify({
             'id': order.id,
             'user_id': order.user_id,
             'items': order.items,
-            'price': order.price,
+            'price': order.total_price,
             'order_status': order.order_status,
             'created_at': order.created_at.isoformat(),
         }), 200

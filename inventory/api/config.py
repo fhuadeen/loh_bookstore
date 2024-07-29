@@ -7,6 +7,7 @@ BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
 from loh_utils.databases.sql import PostgreSQL
 from loh_utils.media.s3 import S3
+from loh_utils.event_bus import RabbitMQ
 
 load_dotenv()
 
@@ -25,6 +26,13 @@ INVENTORY_QUEUE = str(os.getenv("INVENTORY_QUEUE"))
 AI_QUEUE = str(os.getenv("AI_QUEUE"))
 
 db = PostgreSQL(database_url=DATABASE_URL)
+
+event_bus = RabbitMQ(
+    host=RABBITMQ_HOST,
+    port=RABBITMQ_PORT,
+    username=RABBITMQ_USERNAME,
+    password=RABBITMQ_PASSWORD,
+)
 
 s3_obj = S3(
     aws_access_key_id=AWS_ACCESS_KEY_ID,

@@ -43,8 +43,14 @@ def seed_books_to_db(num_books: int, book_model_obj: BooksInventory) -> str:
     """
 
     # seed data if not exist
-    kwargs = {"model_class": Book}
-    db_books = book_model_obj.db.query(**kwargs)
+    # kwargs = {"model_class": Book}
+
+    db_kwargs = {
+        "model_class": [Book],
+        "filters": [],
+        "fetch_all": True,
+    }
+    db_books = book_model_obj.db.query(**db_kwargs)
 
     if not db_books:
         books = generate_fake_books(num_books)
