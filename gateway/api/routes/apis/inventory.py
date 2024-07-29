@@ -39,7 +39,7 @@ def get_book_by_id(book_id):
 
 @inventory_bp.route("/books/create", methods=['PATCH'])
 @jwt_required()
-@swag_from(documentation[4])
+@swag_from(documentation[5])
 def create_book():
     data = request.form.get('payload')
 

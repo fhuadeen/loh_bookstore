@@ -21,7 +21,7 @@ from api.validators import (
 oms_bp = Blueprint('oms', __name__)
 
 @oms_bp.route("/orders", methods=['GET'])
-@swag_from(documentation[5])
+@swag_from(documentation[6])
 @jwt_required()
 def get_all_user_orders():
 
@@ -39,7 +39,7 @@ def get_all_user_orders():
 
 @oms_bp.route("/orders/<order_id>", methods=['GET'])
 @jwt_required()
-@swag_from(documentation[6])
+@swag_from(documentation[7])
 def get_book_by_id(order_id):
 
     # get current user id
@@ -56,7 +56,7 @@ def get_book_by_id(order_id):
 
 @oms_bp.route("/orders/buy", methods=['POST'])
 @jwt_required()
-@swag_from(documentation[7])
+@swag_from(documentation[8])
 def place_order():
     data = request.get_json()
 
@@ -82,7 +82,7 @@ def place_order():
 
 @oms_bp.route("/orders/status/update", methods=['PATCH'])
 @jwt_required()
-@swag_from(documentation[8])
+@swag_from(documentation[9])
 def update_order_status():
     data = request.get_json()
 

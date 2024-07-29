@@ -14,6 +14,7 @@ TOKEN_EXPIRY_HOURS: str = str(os.getenv("TOKEN_EXPIRY_HOURS"))
 JWT_SECRET_KEY: str = str(os.getenv("JWT_SECRET_KEY"))
 INVENTORY_BASE_URL: str = str(os.getenv("INVENTORY_BASE_URL"))
 OMS_BASE_URL: str = str(os.getenv("OMS_BASE_URL"))
+AI_BASE_URL: str = str(os.getenv("AI_BASE_URL"))
 
 db = PostgreSQL(database_url=DATABASE_URL)
 

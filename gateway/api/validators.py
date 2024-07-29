@@ -1,5 +1,6 @@
 from typing import Optional, Dict, List, Union, Any
 import abc
+import html
 
 from pydantic import BaseModel, EmailStr, Field, ValidationError
 from flask import jsonify
@@ -30,6 +31,10 @@ class UpdateOrderStatusValidator(BaseModel):
     user_id: str = Field(...)
 
 
+class SummariseBookValidator(BaseModel):
+    query: str = Field(...)
+
+
 def validate(validator_class: Union[BaseModel, Any], data: Dict) -> Dict:
     """
     Runs a validator class on given payload
@@ -44,8 +49,18 @@ def validate(validator_class: Union[BaseModel, Any], data: Dict) -> Dict:
     Returns:
         Dict: Validated data
     """
+
+    sanitized_data = {}
+    for key, value in data.items():
+        if isinstance(value, str):
+            # Remove leading and trailing whitespace
+            value = value.strip()
+            # Escape HTML
+            value = html.escape(value)
+        sanitized_data[key] = value
+
     try:
-        validated_data = validator_class(**data)
+        validated_data = validator_class(**sanitized_data)
     except ValidationError as err:
         raise Exception(str(err.errors()))
     return dict(validated_data)
