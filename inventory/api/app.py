@@ -1,13 +1,15 @@
 import os
 import sys
 from multiprocessing import Process
+import json
 
 BASE = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, BASE)
 
-from flask import Flask
+from flask import Flask, request, jsonify
 from flasgger import Swagger
 from flasgger.utils import swag_from
+from werkzeug.utils import secure_filename
 
 from loh_utils.databases.sql import Book
 
@@ -38,6 +40,26 @@ def get_all_books():
 def get_book_by_id(book_id):
     inventory = BooksInventory(db=db)
     return inventory.get_book_by_id(book_id=book_id)
+
+@app.route("/products/books/create", methods=["POST"])
+@swag_from(documentation[2])
+def create_book():
+    data = request.form.get('payload')
+
+    if data:
+        data = json.loads(data)
+    else:
+        return jsonify({"message": "In put Book form"}, 400)
+
+    if "file" not in request.files:
+        return jsonify({"message": "No file part in the request"}, 400)
+    file = request.files["file"]
+
+    if file.filename == "":
+        return jsonify({"message": "No selected file"}, 400)
+    
+    inventory = BooksInventory(db=db)
+    return inventory.create_book(data, file)
 
 
 if __name__ == '__main__':

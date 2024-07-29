@@ -1,4 +1,4 @@
-from typing import Dict, List, Any, Tuple
+from typing import Dict, List, Any, Tuple, Optional
 import os
 import sys
 import abc
@@ -9,11 +9,15 @@ sys.path.insert(0, BASE)
 
 from loh_utils.loh_base import LoHBase
 from loh_utils.databases.sql import Book
+from loh_utils.media import Media
 
 from flask import jsonify
 from flask_restful import abort
+from werkzeug.utils import secure_filename
 
-from api.config import db
+from api.config import db, s3_obj, AI_QUEUE
+from api.events import publish
+
 
 class Inventory(LoHBase):
     def update_products(self):
@@ -75,12 +79,52 @@ class BooksInventory(Inventory):
             'created_at': book.created_at.isoformat(),
         }), 200
 
+    def create_book(
+        self,
+        product: Dict,
+        book_file: Optional[Any] = None,
+        media_obj: Media = s3_obj,
+    ) -> str:
+
+
+        if book_file:
+            filename = secure_filename(book_file.filename)
+            print(filename)
+            try:
+                media_obj.upload_file(book_file, filename)
+            except Exception as err:
+                return jsonify({"error": f"Unable to save file to storage: {str(err)}"})
+        else:
+            return jsonify({"message": "File type not allowed"}, 400)
+
+        book = Book(
+            name=product.get("name"),
+            file_name=filename,
+            unit_price=product.get("unit_price"),
+            unit_cost=product.get("unit_cost"),
+            units=product.get("units"),
+        )
+
+        try:
+            self.db.insert(book)
+        except Exception as err:
+            return jsonify({"message": f"Failed to insert in db: {str(err)}"}), 500
+
+        # send message to inventory to update items units
+        publish(
+            msg=dict(book),
+            queue_name=AI_QUEUE,
+        )
+
+        return jsonify({"message": "Book created successfully"}), 201
+
     def create_products(self, products: List[Dict]) -> str:
 
         books = []
         for product in products:
             book = Book(
                 name=product.get("name"),
+                filename=None,
                 unit_price=product.get("unit_price"),
                 unit_cost=product.get("unit_cost"),
                 units=product.get("units"),

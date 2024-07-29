@@ -58,5 +58,55 @@
                 }
             }
         }
+    },
+    {
+        "tags": ["Books"],
+        "parameters": [
+            {
+                "name": "body",
+                "in": "body",
+                "required": true,
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string", "example": "bf83535a-9244-429c-9bf2-08e8b5a716a7"},
+                        "unit_price": {"type": "number", "example": 546.80},
+                        "unit_cost": {"type": "number", "example": 546.80},
+                        "units": {"type": "integer", "example": "units"}
+                    },
+                    "required": ["name", "unit_price", "unit_cost", "units"]
+                }
+            }
+        ],
+        "responses": {
+            "200": {
+                "description": "Book created",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "404": {
+                "description": "File not found",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"}
+                    }
+                }
+            },
+            "500": {
+                "description": "Unable to save file to storage",
+                "schema": {
+                    "type": "object",
+                    "properties": {
+                        "message": {"type": "string"},
+                        "error": {"type": "string"}
+                    }
+                }
+            }
+        }
     }
 ]
