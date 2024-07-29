@@ -50,3 +50,11 @@ docker run --env-file .env -p 5000:5000 service_name
 
 ### Run in Kubernetes (Recommended)
 Check `loh_infra` repo for instructions
+
+### service: port
+- gateway: 5000
+- inventory: 5001
+- oms: 5002
+- payment: 5003
+- notifications: 5004
+- ai_service: 5005
